@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.preference.PreferenceScreen
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <androidx.preference.PreferenceCategory
+        app:title="Filters">
+
+        <!-- Custom Star Rating Preference (Min) -->
+        <tv.projectivy.plugin.wallpaperprovider.sample.StarRatingPreference
+            app:key="pref_min_rating"
+            app:title="Minimum Rating"
+            app:defaultValue="7.0"
+            app:summary="Minimum Rating: 7.0 / 10"
+            app:selectable="false" />
+
+        <!-- Custom Star Rating Preference (Max) -->
+        <tv.projectivy.plugin.wallpaperprovider.sample.StarRatingPreference
+            app:key="pref_max_rating"
+            app:title="Maximum Rating"
+            app:defaultValue="10.0"
+            app:summary="Maximum Rating: 10.0 / 10"
+            app:selectable="false" />
+
+    </androidx.preference.PreferenceCategory>
+
+    <androidx.preference.PreferenceCategory
+        app:title="Events">
+
+        <SwitchPreferenceCompat
+            app:key="pref_refresh_on_idle_exit"
+            app:title="Refresh on idle exit"
+            app:defaultValue="true" />
+
+    </androidx.preference.PreferenceCategory>
+
+</androidx.preference.PreferenceScreen>

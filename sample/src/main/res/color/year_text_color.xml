@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Focused & Selected: Black text (on Accent) -->
+    <item android:state_focused="true" android:state_selected="true" android:color="#000000"/>
+
+    <!-- Focused: White text (on Dark Gray) -->
+    <item android:state_focused="true" android:color="#FFFFFF"/>
+
+    <!-- Selected: Black text (on Accent) -->
+    <item android:state_selected="true" android:color="#000000"/>
+
+    <!-- Default: White text (on Dark Gray) -->
+    <item android:color="#EEEEEE"/>
+</selector>

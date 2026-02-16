@@ -1,0 +1,59 @@
+name: Android Build & Release
+
+on:
+  push:
+    branches:
+      - "main"
+      - "dev"
+  workflow_dispatch:
+
+# Damit das Skript Releases erstellen darf
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+          cache: gradle
+
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+
+      - name: Build Debug APK
+        run: ./gradlew assembleDebug
+
+      # NEU: Datei suchen, umbenennen und ins Hauptverzeichnis holen
+      - name: Rename and Move APK
+        run: |
+          find . -name "*-debug.apk" -exec mv {} projectivy-tvbgsuite-plugin.apk \;
+          echo "APK wurde umbenannt und verschoben."
+
+      # Schritt für DEV & MAIN: Als Artifact hochladen (für schnelle Tests)
+      # Jetzt liegt die Datei direkt im Root, also keine Unterordner mehr im ZIP!
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: projectivy-tvbgsuite-plugin
+          path: projectivy-tvbgsuite-plugin.apk
+          retention-days: 5
+
+      # NEU: Schritt nur für MAIN: Ein "Latest Release" erstellen
+      - name: Update Latest Release
+        if: github.ref == 'refs/heads/main'
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: latest
+          name: Latest Stable Build
+          body: "Automatisch erstellter Build vom Main-Branch."
+          files: projectivy-tvbgsuite-plugin.apk
+          make_latest: true
