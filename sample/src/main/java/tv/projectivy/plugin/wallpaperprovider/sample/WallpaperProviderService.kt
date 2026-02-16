@@ -69,31 +69,28 @@ class WallpaperProviderService: Service() {
                             val rawAction = status.actionUrl ?: ""
                             var finalAction: String? = null
 
-                            // Parse the custom actionUrl format (e.g., "movies_tmdb:967941")
+                            // Format: "movies_tmdb:967941" -> "stremio:///detail/movie/tmdb:967941/tmdb:967941"
                             if (rawAction.contains("_tmdb:")) {
-                                val parts = rawAction.split("_tmdb:") // Split into ["movies", "967941"]
+                                val parts = rawAction.split("_tmdb:")
                                 if (parts.size == 2) {
-                                    val type = parts[0] // "movies" or "series"
-                                    val id = parts[1]   // "967941"
+                                    val typeRaw = parts[0] // "movies" or "series"
+                                    val id = parts[1]      // "967941"
 
-                                    // Map "movies" -> "movie" and "series" -> "series" for Stremio
-                                    val stremioType = when (type) {
+                                    val stremioType = when (typeRaw) {
                                         "movies" -> "movie"
                                         "series" -> "series"
-                                        else -> type
+                                        else -> "movie" // fallback
                                     }
 
-                                    // Construct the final Stremio URI
-                                    finalAction = "stremio://detail/$stremioType/tmdb:$id"
+                                    // Constructing the triple-slash URI with duplicated ID for Android TV compatibility
+                                    finalAction = "stremio:///detail/$stremioType/tmdb:$id/tmdb:$id"
                                 }
                             } else {
-                                // Fallback if the format doesn't match
-                                finalAction = rawAction
+                                finalAction = rawAction // Fallback to raw if format differs
                             }
 
-                            Log.e("WallpaperService", "PROJECTIVY_LOG: Converted $rawAction to $finalAction")
+                            Log.e("WallpaperService", "PROJECTIVY_LOG: Action Mapped: $finalAction")
 
-                            // Save for persistence
                             PreferencesManager.lastWallpaperUri = status.imageUrl
                             PreferencesManager.lastWallpaperAuthor = status.title ?: ""
 
@@ -103,7 +100,7 @@ class WallpaperProviderService: Service() {
                                     type = WallpaperType.IMAGE,
                                     displayMode = WallpaperDisplayMode.CROP,
                                     author = status.title,
-                                    actionUri = finalAction // This is now the Stremio link
+                                    actionUri = finalAction
                                 )
                             )
                         }
