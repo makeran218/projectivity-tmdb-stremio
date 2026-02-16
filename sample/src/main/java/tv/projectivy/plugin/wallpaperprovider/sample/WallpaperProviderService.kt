@@ -35,25 +35,14 @@ class WallpaperProviderService: Service() {
 
             var forceRefresh = false
 
-            // Logic for handling Idle mode transitions
             if (event is Event.LauncherIdleModeChanged) {
                 if (!event.isIdle) {
                     if (PreferencesManager.refreshOnIdleExit) {
-                        Log.e("WallpaperService", "PROJECTIVY_LOG: Refreshing on idle exit")
                         forceRefresh = true
                     } else {
                         val lastUri = PreferencesManager.lastWallpaperUri
-                        val lastAuthor = PreferencesManager.lastWallpaperAuthor
                         if (lastUri.isNotBlank()) {
-                            return listOf(
-                                Wallpaper(
-                                    uri = lastUri,
-                                    type = WallpaperType.IMAGE,
-                                    displayMode = WallpaperDisplayMode.CROP,
-                                    author = lastAuthor.ifBlank { null },
-                                    actionUri = null
-                                )
-                            )
+                            return listOf(Wallpaper(uri = lastUri, type = WallpaperType.IMAGE, displayMode = WallpaperDisplayMode.CROP, author = PreferencesManager.lastWallpaperAuthor, actionUri = null))
                         }
                         return emptyList()
                     }
@@ -62,10 +51,8 @@ class WallpaperProviderService: Service() {
                 }
             }
 
-            // Execute API Call for TimeElapsed or forced Refresh
             if (event is Event.TimeElapsed || forceRefresh) {
                 try {
-                    // We use the root IP as the base URL
                     val fixedBaseUrl = "http://192.168.2.50/"
 
                     val apiService = Retrofit.Builder()
@@ -74,34 +61,31 @@ class WallpaperProviderService: Service() {
                         .build()
                         .create(ApiService::class.java)
 
-                    // Call the fixed endpoint (tvdb) defined in ApiService
                     val response = apiService.getWallpaperStatus().execute()
 
                     if (response.isSuccessful) {
                         val status = response.body()
                         if (status != null) {
-                            Log.e("WallpaperService", "PROJECTIVY_LOG: API Success: ${status.imageUrl}")
-
-                            // Use the actionUrl and title directly from your JSON
+                            // KEEPING JELLYFIN ACTION LOGIC
+                            // If the URL is jellyfin://items/123, it stays that way.
+                            // Projectivy Launcher will handle the intent if the app is installed.
                             val action = status.actionUrl
-                            val displayTitle = status.title ?: ""
 
-                            // Save for persistence so it shows up when offline or restarting
+                            Log.e("WallpaperService", "PROJECTIVY_LOG: API Success: ${status.imageUrl} | Action: $action")
+
                             PreferencesManager.lastWallpaperUri = status.imageUrl
-                            PreferencesManager.lastWallpaperAuthor = displayTitle
+                            PreferencesManager.lastWallpaperAuthor = status.title ?: ""
 
                             return listOf(
                                 Wallpaper(
                                     uri = status.imageUrl,
                                     type = WallpaperType.IMAGE,
                                     displayMode = WallpaperDisplayMode.CROP,
-                                    author = displayTitle,
-                                    actionUri = action
+                                    author = status.title,
+                                    actionUri = action // This passes the Jellyfin link to the launcher
                                 )
                             )
                         }
-                    } else {
-                        Log.e("WallpaperService", "PROJECTIVY_LOG: API Response Unsuccessful: ${response.code()}")
                     }
                 } catch (e: Exception) {
                     Log.e("WallpaperService", "PROJECTIVY_LOG: API Error", e)
