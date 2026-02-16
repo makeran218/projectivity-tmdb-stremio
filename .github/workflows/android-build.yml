@@ -49,7 +49,7 @@ jobs:
 
       # NEU: Schritt nur für MAIN: Ein "Latest Release" erstellen
       - name: Update Latest Release
-        if: github.ref == 'refs/heads/main'
+        if: github.ref == 'refs/heads/master'
         uses: softprops/action-gh-release@v2
         with:
           tag_name: latest
