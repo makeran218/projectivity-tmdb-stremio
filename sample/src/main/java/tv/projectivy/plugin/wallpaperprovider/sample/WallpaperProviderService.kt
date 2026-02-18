@@ -88,7 +88,7 @@ class WallpaperProviderService: Service() {
 
                                     if (type == "tv") type = "series"
 
-                                    finalAction = "stremio:///detail/$type/tmdb:$id/tmdb:$id"
+                                    finalAction = "stremio:///detail/$type/tmdb:$id"
                                 }
                             }
 
