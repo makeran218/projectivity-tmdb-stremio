@@ -51,6 +51,8 @@ class WallpaperProviderService: Service() {
                 }
             }
 
+            // ... inside getWallpapers(event: Event?) ...
+
             if (event is Event.TimeElapsed || forceRefresh) {
                 try {
                     val fixedBaseUrl = "https://makeran218.github.io/projectivity-background-source/"
@@ -61,35 +63,33 @@ class WallpaperProviderService: Service() {
                         .build()
                         .create(ApiService::class.java)
 
+                    // Fetch the LIST of wallpapers
                     val response = apiService.getWallpaperStatus().execute()
 
                     if (response.isSuccessful) {
-                        val status = response.body()
-                        if (status != null) {
+                        val list = response.body()
+                        if (!list.isNullOrEmpty()) {
+                            // RANDOMLY PICK ONE
+                            val status = list.random()
+
                             val rawAction = status.actionUrl ?: ""
                             var finalAction: String? = null
 
-                            // Format: "movies_tmdb:967941" -> "stremio:///detail/movie/tmdb:967941/tmdb:967941"
+                            // Conversion logic: "movie_tmdb:43943" -> "stremio:///detail/movie/tmdb:43943/tmdb:43943"
                             if (rawAction.contains("_tmdb:")) {
                                 val parts = rawAction.split("_tmdb:")
                                 if (parts.size == 2) {
-                                    val typeRaw = parts[0] // "movies" or "series"
-                                    val id = parts[1]      // "967941"
+                                    var type = parts[0] // "movie" or "tv"
+                                    val id = parts[1]
 
-                                    val stremioType = when (typeRaw) {
-                                        "movies" -> "movie"
-                                        "series" -> "series"
-                                        else -> "movie" // fallback
-                                    }
+                                    // Map "tv" to "series" for Stremio compatibility
+                                    if (type == "tv") type = "series"
 
-                                    // Constructing the triple-slash URI with duplicated ID for Android TV compatibility
-                                    finalAction = "stremio:///detail/$stremioType/tmdb:$id/tmdb:$id"
+                                    finalAction = "stremio:///detail/$type/tmdb:$id/tmdb:$id"
                                 }
-                            } else {
-                                finalAction = rawAction // Fallback to raw if format differs
                             }
 
-                            Log.e("WallpaperService", "PROJECTIVY_LOG: Action Mapped: $finalAction")
+                            Log.e("WallpaperService", "PROJECTIVY_LOG: Selected ${status.title} | Action: $finalAction")
 
                             PreferencesManager.lastWallpaperUri = status.imageUrl
                             PreferencesManager.lastWallpaperAuthor = status.title ?: ""
