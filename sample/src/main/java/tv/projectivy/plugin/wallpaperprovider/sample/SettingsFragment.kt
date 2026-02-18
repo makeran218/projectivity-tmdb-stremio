@@ -35,7 +35,7 @@ class SettingsFragment : GuidedStepSupportFragment() {
             // 1. Server URL Action
             actions.add(GuidedAction.Builder(context)
                 .id(ACTION_ID_SERVER_URL)
-                .title("Server URL")
+                .title("Github Page URL")
                 .description(if (serverUrl.isNotEmpty()) serverUrl else "https://...")
                 .editDescription(serverUrl)
                 .descriptionEditable(true)
