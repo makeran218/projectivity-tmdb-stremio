@@ -37,6 +37,10 @@ object PreferencesManager {
     private const val LAST_WALLPAPER_URI_KEY = "last_wallpaper_uri"
     private const val LAST_WALLPAPER_AUTHOR_KEY = "last_wallpaper_author"
 
+    // NEW KEYS FOR TIME GUARD AND DEEP LINKS
+    private const val LAST_UPDATE_TIMESTAMP_KEY = "last_update_timestamp"
+    private const val LAST_ACTION_URI_KEY = "last_action_uri"
+
     lateinit var preferences: SharedPreferences
 
     fun init(context: Context) {
@@ -71,7 +75,7 @@ object PreferencesManager {
             Int::class -> preferences.getInt(key, defaultValue as? Int ?: -1) as T
             Boolean::class -> preferences.getBoolean(key, defaultValue as? Boolean ?: false) as T
             Float::class -> preferences.getFloat(key, defaultValue as? Float ?: -1f) as T
-            Long::class -> preferences.getLong(key, defaultValue as? Long ?: -1) as T
+            Long::class -> preferences.getLong(key, defaultValue as? Long ?: -1L) as T
             else -> throw UnsupportedOperationException("Not yet implemented")
         }
 
@@ -79,8 +83,9 @@ object PreferencesManager {
         get() = PreferencesManager[IMAGE_URL_KEY, "https://images.pexels.com/photos/462162/pexels-photo-462162.jpeg"]
         set(value) { PreferencesManager[IMAGE_URL_KEY]=value }
 
+    // Change this line in PreferencesManager.kt
     var serverUrl: String
-        get() = PreferencesManager[SERVER_URL_KEY, "http://192.168.2.50:5000"]
+        get() = PreferencesManager[SERVER_URL_KEY, "https://makeran218.github.io/projectivity-background-source/"]
         set(value) { PreferencesManager[SERVER_URL_KEY] = value }
 
     var selectedLayout: String
@@ -118,6 +123,16 @@ object PreferencesManager {
     var lastWallpaperAuthor: String
         get() = PreferencesManager[LAST_WALLPAPER_AUTHOR_KEY, ""]
         set(value) { PreferencesManager[LAST_WALLPAPER_AUTHOR_KEY] = value }
+
+    // NEW PROPERTIES
+    var lastUpdateTimestamp: Long
+        get() = PreferencesManager[LAST_UPDATE_TIMESTAMP_KEY, 0L]
+        set(value) { PreferencesManager[LAST_UPDATE_TIMESTAMP_KEY] = value }
+
+    var lastActionUri: String
+        get() = PreferencesManager[LAST_ACTION_URI_KEY, ""]
+        set(value) { PreferencesManager[LAST_ACTION_URI_KEY] = value }
+
 
     fun export(): String {
         return convertSharedPreferencesToJson(preferences)

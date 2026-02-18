@@ -12,7 +12,7 @@ import tv.projectivy.plugin.wallpaperprovider.api.Wallpaper
 import tv.projectivy.plugin.wallpaperprovider.api.WallpaperDisplayMode
 import tv.projectivy.plugin.wallpaperprovider.api.WallpaperType
 
-class WallpaperProviderService: Service() {
+class WallpaperProviderService : Service() {
 
     override fun onCreate() {
         super.onCreate()
@@ -31,71 +31,83 @@ class WallpaperProviderService: Service() {
 
     private val binder = object : IWallpaperProviderService.Stub() {
         override fun getWallpapers(event: Event?): List<Wallpaper> {
-            Log.e("WallpaperService", "PROJECTIVY_LOG: getWallpapers | Event: ${event?.eventType}")
+            val eventType = event?.eventType ?: -1
+            Log.e("WallpaperService", "PROJECTIVY_LOG: getWallpapers | Event: $eventType")
 
             var forceRefresh = false
 
+            // Handle Idle Mode changes
             if (event is Event.LauncherIdleModeChanged) {
                 if (!event.isIdle) {
                     if (PreferencesManager.refreshOnIdleExit) {
                         forceRefresh = true
                     } else {
-                        val lastUri = PreferencesManager.lastWallpaperUri
-                        if (lastUri.isNotBlank()) {
-                            return listOf(Wallpaper(uri = lastUri, type = WallpaperType.IMAGE, displayMode = WallpaperDisplayMode.CROP, author = PreferencesManager.lastWallpaperAuthor, actionUri = null))
-                        }
-                        return emptyList()
+                        return getLastSavedWallpaper()
                     }
                 } else {
                     return emptyList()
                 }
             }
 
-            // ... inside getWallpapers(event: Event?) ...
+            // Time Guard Logic: Avoid fast flickering on service restarts
+            val currentTime = System.currentTimeMillis()
+            val lastUpdate = PreferencesManager.lastUpdateTimestamp // Ensure this exists in your PreferencesManager
+            val oneMinuteInMillis = 60 * 1000
+
+            // If it's a standard elapsed event (1) but not enough time has passed, return last wallpaper
+            if (event is Event.TimeElapsed && !forceRefresh) {
+                if (currentTime - lastUpdate < oneMinuteInMillis) {
+                    Log.e("WallpaperService", "PROJECTIVY_LOG: Skipping API call - too soon (${(currentTime - lastUpdate) / 1000}s since last change)")
+                    return getLastSavedWallpaper()
+                }
+            }
 
             if (event is Event.TimeElapsed || forceRefresh) {
                 try {
-                    val fixedBaseUrl = "https://makeran218.github.io/projectivity-background-source/"
+                    // Get the URL from user input/preferences
+                    var dynamicBaseUrl = PreferencesManager.serverUrl
+
+                    // Safety check: Retrofit requires the URL to end with a /
+                    if (!dynamicBaseUrl.endsWith("/")) {
+                        dynamicBaseUrl += "/"
+                    }
 
                     val apiService = Retrofit.Builder()
-                        .baseUrl(fixedBaseUrl)
+                        .baseUrl(dynamicBaseUrl) // Use the dynamic URL here
                         .addConverterFactory(GsonConverterFactory.create())
                         .build()
                         .create(ApiService::class.java)
 
-                    // Fetch the LIST of wallpapers
                     val response = apiService.getWallpaperStatus().execute()
-
                     if (response.isSuccessful) {
                         val wallpaperList: List<WallpaperStatus>? = response.body()
 
-                        // Use size check instead of isNullOrEmpty if the compiler is struggling
-                        if (wallpaperList != null && wallpaperList.size > 0) {
-
-                            // Use standard Random index if .random() is unresolved
-                            val randomIndex = (0 until wallpaperList.size).shuffled().first()
+                        if (wallpaperList != null && wallpaperList.isNotEmpty()) {
+                            // Pick random
+                            val randomIndex = (Math.random() * wallpaperList.size).toInt()
                             val status = wallpaperList[randomIndex]
 
+                            // Deep Link Logic
                             val rawAction = status.actionUrl ?: ""
                             var finalAction: String? = null
 
-                            // Conversion logic: "movie_tmdb:43943" -> "stremio:///detail/movie/tmdb:43943/tmdb:43943"
                             if (rawAction.contains("_tmdb:")) {
                                 val parts = rawAction.split("_tmdb:")
                                 if (parts.size == 2) {
-                                    var type = parts[0] // "movie" or "tv"
+                                    var type = parts[0]
                                     val id = parts[1]
-
                                     if (type == "tv") type = "series"
-
                                     finalAction = "stremio:///detail/$type/tmdb:$id"
                                 }
                             }
 
                             Log.e("WallpaperService", "PROJECTIVY_LOG: Selected ${status.title} | Action: $finalAction")
 
+                            // Save to Preferences
                             PreferencesManager.lastWallpaperUri = status.imageUrl
                             PreferencesManager.lastWallpaperAuthor = status.title ?: ""
+                            PreferencesManager.lastActionUri = finalAction ?: "" // Store this so it persists
+                            PreferencesManager.lastUpdateTimestamp = currentTime
 
                             return listOf(
                                 Wallpaper(
@@ -112,7 +124,27 @@ class WallpaperProviderService: Service() {
                     Log.e("WallpaperService", "PROJECTIVY_LOG: API Error", e)
                 }
             }
-            return emptyList()
+
+            // Fallback to last known wallpaper if API fails or logic falls through
+            return getLastSavedWallpaper()
+        }
+
+        // Helper function to keep code clean
+        private fun getLastSavedWallpaper(): List<Wallpaper> {
+            val lastUri = PreferencesManager.lastWallpaperUri
+            return if (lastUri.isNotBlank()) {
+                listOf(
+                    Wallpaper(
+                        uri = lastUri,
+                        type = WallpaperType.IMAGE,
+                        displayMode = WallpaperDisplayMode.CROP,
+                        author = PreferencesManager.lastWallpaperAuthor,
+                        actionUri = PreferencesManager.lastActionUri
+                    )
+                )
+            } else {
+                emptyList()
+            }
         }
 
         override fun getPreferences(): String = PreferencesManager.export()
