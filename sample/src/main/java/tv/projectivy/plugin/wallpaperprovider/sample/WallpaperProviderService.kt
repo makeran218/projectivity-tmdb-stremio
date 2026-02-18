@@ -67,10 +67,14 @@ class WallpaperProviderService: Service() {
                     val response = apiService.getWallpaperStatus().execute()
 
                     if (response.isSuccessful) {
-                        val list = response.body()
-                        if (!list.isNullOrEmpty()) {
-                            // RANDOMLY PICK ONE
-                            val status = list.random()
+                        val wallpaperList: List<WallpaperStatus>? = response.body()
+
+                        // Use size check instead of isNullOrEmpty if the compiler is struggling
+                        if (wallpaperList != null && wallpaperList.size > 0) {
+
+                            // Use standard Random index if .random() is unresolved
+                            val randomIndex = (0 until wallpaperList.size).shuffled().first()
+                            val status = wallpaperList[randomIndex]
 
                             val rawAction = status.actionUrl ?: ""
                             var finalAction: String? = null
@@ -82,7 +86,6 @@ class WallpaperProviderService: Service() {
                                     var type = parts[0] // "movie" or "tv"
                                     val id = parts[1]
 
-                                    // Map "tv" to "series" for Stremio compatibility
                                     if (type == "tv") type = "series"
 
                                     finalAction = "stremio:///detail/$type/tmdb:$id/tmdb:$id"
