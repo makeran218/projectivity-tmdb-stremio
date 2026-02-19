@@ -103,9 +103,14 @@ class WallpaperProviderService : Service() {
                                             val stremioType = if (type == "tv") "series" else "movie"
                                             "stremio:///detail/$stremioType/tmdb:$id"
                                         }
-                                        "Kodi" -> {
-                                            // Targeting TMDB Helper as discussed
-                                            "kodi://runplugin/plugin.video.themoviedb.helper/?action=play_item&tmdb_id=$id&type=$type"
+                                        "KODI" -> {
+                                            val query = status.title?.replace(" ", "%20") ?: ""
+                                            val action = if (type == "tv") "tmdb_tv_search" else "tmdb_movies_search"
+
+                                            // Adding mode=None often bypasses the navigator_cache.py loop
+                                            val kodiUrl = "plugin://plugin.video.pov/?action=$action&query=$query&mode=None"
+
+                                            "intent:#Intent;action=android.intent.action.VIEW;scheme=plugin;dat=$kodiUrl;package=org.xbmc.kodi;end"
                                         }
                                         "Plex", "Emby" -> {
                                             // Placeholder: These usually require a web search or specific server item IDs
