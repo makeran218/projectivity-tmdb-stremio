@@ -105,9 +105,14 @@ class WallpaperProviderService : Service() {
                                             val stremioType = if (type == "tv") "series" else "movie"
                                             "stremio:///detail/$stremioType/tmdb:$id"
                                         }
-                                        "Kodi" -> {
+                                        "Kodi POV", "Kodi Fenlight" -> {
                                             val mediaType = if (type == "tv") "episode" else "movie"
-                                            var kodiUrl = "plugin://plugin.video.pov/?mode=play_media" +
+
+                                            // Choose the plugin ID based on the selection
+                                            val pluginId = if (targetApp == "Kodi POV") "plugin.video.pov" else "plugin.video.fenlight"
+
+                                            // Fen Light and POV both accept these parameters
+                                            var kodiUrl = "plugin://$pluginId/?mode=play_media" +
                                                         "&mediatype=$mediaType" +
                                                         "&tmdb_id=$id" +
                                                         "&autoplay=false"
@@ -116,7 +121,7 @@ class WallpaperProviderService : Service() {
                                                 kodiUrl += "&season=1&episode=1"
                                             }
 
-                                            // Return the string (don't use finalAction = ...)
+                                            // Return the intent string
                                             "intent:$kodiUrl#Intent;action=android.intent.action.VIEW;package=org.xbmc.kodi;component=org.xbmc.kodi/.Main;end"
                                         }
                                         "Plex" -> {
