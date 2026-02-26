@@ -106,7 +106,9 @@ class WallpaperProviderService : Service() {
                                             "stremio:///detail/$stremioType/tmdb:$id"
                                         }
                                         "Kodi POV" -> {
-                                            val mediaType = if (type == "tv") "episode" else "movie"
+                                            // Force 'tv' or 'movie'
+                                            val mediaType = if (type == "tv") "tv" else "movie"
+
                                             var kodiUrl = "plugin://plugin.video.pov/?mode=play_media" +
                                                         "&mediatype=$mediaType" +
                                                         "&tmdb_id=$id" +
@@ -118,10 +120,11 @@ class WallpaperProviderService : Service() {
                                         }
 
                                         "Kodi Fenlight" -> {
-                                            // Fen Light uses 'media_type' and 'playback.media' for external intents
-                                            val mediaType = if (type == "tv") "episode" else "movie"
+                                            // Force 'tv' or 'movie'
+                                            val mediaType = if (type == "tv") "tv" else "movie"
+
                                             var kodiUrl = "plugin://plugin.video.fenlight/?mode=playback.media" +
-                                                        "&media_type=$mediaType" + // Note the underscore
+                                                        "&media_type=$mediaType" +
                                                         "&tmdb_id=$id" +
                                                         "&autoplay=false"
 
