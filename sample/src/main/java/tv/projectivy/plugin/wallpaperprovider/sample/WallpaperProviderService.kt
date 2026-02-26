@@ -97,7 +97,9 @@ class WallpaperProviderService : Service() {
                                 if (parts.size == 2) {
                                     val type = parts[0] // "movie" or "tv"
                                     val id = parts[1]
+                                    val title = status.title ?: "" // We need the title for Plex/Emby search
 
+                                    // EXPLICITLY set the type to String? to fix the compilation error
                                     finalAction = when (targetApp) {
                                         "Stremio" -> {
                                             val stremioType = if (type == "tv") "series" else "movie"
@@ -105,8 +107,6 @@ class WallpaperProviderService : Service() {
                                         }
                                         "Kodi" -> {
                                             val mediaType = if (type == "tv") "episode" else "movie"
-
-                                            // 1. Build the raw plugin URL
                                             var kodiUrl = "plugin://plugin.video.pov/?mode=play_media" +
                                                         "&mediatype=$mediaType" +
                                                         "&tmdb_id=$id" +
@@ -116,14 +116,17 @@ class WallpaperProviderService : Service() {
                                                 kodiUrl += "&season=1&episode=1"
                                             }
 
-                                            // 2. Wrap it in a proper Android Intent string
-                                            // This tells Android: "Open this Data, using the VIEW action, specifically for Kodi's Main activity"
-                                            finalAction = "intent:$kodiUrl#Intent;action=android.intent.action.VIEW;package=org.xbmc.kodi;component=org.xbmc.kodi/.Main;end"
+                                            // Return the string (don't use finalAction = ...)
+                                            "intent:$kodiUrl#Intent;action=android.intent.action.VIEW;package=org.xbmc.kodi;component=org.xbmc.kodi/.Main;end"
                                         }
-                                        "Plex", "Emby" -> {
-                                            // Placeholder: These usually require a web search or specific server item IDs
-                                            // For now, we'll just log it
-                                            null
+                                        "Plex" -> {
+                                            // Plex deep link to search
+                                            "plex://search?query=$title"
+                                        }
+                                        "Emby" -> {
+                                            // Emby doesn't have a standardized URI for search,
+                                            // but we can send a Search Intent to the package
+                                            "intent:#Intent;action=android.intent.action.SEARCH;s.query=$title;package=com.mb.android;end"
                                         }
                                         else -> null
                                     }
