@@ -56,7 +56,7 @@ class SettingsFragment : GuidedStepSupportFragment() {
 
             val serverUrl = PreferencesManager.serverUrl
             val refreshOnIdle = PreferencesManager.refreshOnIdleExit
-            val APP_TARGETS = listOf("Stremio", "Kodi", "Plex", "Emby")
+            val APP_TARGETS = listOf("Stremio", "Kodi POV", "Kodi Fenlight", "Plex", "Emby")
 
             // 1. Server URL Action
             actions.add(GuidedAction.Builder(context)
