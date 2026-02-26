@@ -104,27 +104,21 @@ class WallpaperProviderService : Service() {
                                             "stremio:///detail/$stremioType/tmdb:$id"
                                         }
                                         "Kodi" -> {
-                                            // 1. POV expects 'movie' or 'episode'
                                             val mediaType = if (type == "tv") "episode" else "movie"
 
-                                            // 2. Construct the POV plugin URL
-                                            // We use play_media mode which is more stable for external intents
+                                            // 1. Build the raw plugin URL
                                             var kodiUrl = "plugin://plugin.video.pov/?mode=play_media" +
                                                         "&mediatype=$mediaType" +
                                                         "&tmdb_id=$id" +
-                                                        "&query=Search" + // Added a placeholder query to prevent errors
                                                         "&autoplay=false"
 
-                                            // 3. For TV, you MUST provide season and episode or POV will fail to scrap
                                             if (type == "tv") {
                                                 kodiUrl += "&season=1&episode=1"
                                             }
 
-                                            // 4. THE FIX: URL Encode the internal plugin URL so the Intent doesn't break
-                                            val encodedKodiUrl = java.net.URLEncoder.encode(kodiUrl, "UTF-8")
-
-                                            // 5. Wrap in the kodi:// scheme which Projectivy handles much better than the 'intent:' scheme
-                                            "kodi://executebuiltin/PlayMedia($kodiUrl)"
+                                            // 2. Wrap it in a proper Android Intent string
+                                            // This tells Android: "Open this Data, using the VIEW action, specifically for Kodi's Main activity"
+                                            finalAction = "intent:$kodiUrl#Intent;action=android.intent.action.VIEW;package=org.xbmc.kodi;component=org.xbmc.kodi/.Main;end"
                                         }
                                         "Plex", "Emby" -> {
                                             // Placeholder: These usually require a web search or specific server item IDs
