@@ -106,10 +106,14 @@ class WallpaperProviderService : Service() {
                                             "stremio:///detail/$stremioType/tmdb:$id"
                                         }
                                        "Kodi POV" -> {
-                                            val finalAction = if (type == "tv") {
-                                                // TV: We send the ActivateWindow command via the data URI, but we must escape it
-                                                val kodiCommand = "ActivateWindow(Videos,\"plugin://plugin.video.pov/?mode=build_season_list&tmdb_id=$id\",return)"
-                                                "kodi://$kodiCommand"
+                                           val finalAction = if (type == "tv") {
+
+                                            // Open TV show details via ActivateWindow
+                                            val kodiCommand =
+                                                "ActivateWindow(Videos,\"plugin://plugin.video.fenlight/?mode=tvshow_details&tmdb_id=$id\",return)"
+
+                                            "kodi://$kodiCommand"
+
                                             } else {
                                                 // Movies: Keeping your original working direct-play logic
                                                 "intent:plugin://plugin.video.pov/?mode=play_media&media_type=movie&tmdb_id=$id&autoplay=false#Intent;action=android.intent.action.VIEW;package=org.xbmc.kodi;component=org.xbmc.kodi/.Main;end"
