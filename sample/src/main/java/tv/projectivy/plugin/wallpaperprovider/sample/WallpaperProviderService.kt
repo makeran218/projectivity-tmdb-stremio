@@ -105,26 +105,26 @@ class WallpaperProviderService : Service() {
                                             val stremioType = if (type == "tv") "series" else "movie"
                                             "stremio:///detail/$stremioType/tmdb:$id"
                                         }
-                                        "Kodi POV" -> {
+                                       "Kodi POV" -> {
                                             val kodiUrl = if (type == "tv") {
-                                                // We add &directory=true to tell the internal router this is a GUI list
-                                                "plugin://plugin.video.pov/?mode=build_season_list&tmdb_id=$id&directory=true"
+                                                // We wrap the plugin path in an ActivateWindow call
+                                                "ActivateWindow(Videos,plugin://plugin.video.pov/?mode=build_season_list&tmdb_id=$id,return)"
                                             } else {
                                                 "plugin://plugin.video.pov/?mode=play_media&media_type=movie&tmdb_id=$id&autoplay=false"
                                             }
 
-                                            "intent:$kodiUrl#Intent;action=android.intent.action.VIEW;package=org.xbmc.kodi;component=org.xbmc.kodi/.Main;end"
+                                            "intent:#Intent;action=android.intent.action.VIEW;append=false;package=org.xbmc.kodi;component=org.xbmc.kodi/.Main;S.extras=$kodiUrl;end"
                                         }
 
                                         "Kodi Fenlight" -> {
                                             val kodiUrl = if (type == "tv") {
-                                                // Same logic for Fenlight
-                                                "plugin://plugin.video.fenlight/?mode=build_season_list&tmdb_id=$id&directory=true"
+                                                // We wrap the plugin path in an ActivateWindow call
+                                                "ActivateWindow(Videos,plugin://plugin.video.fenlight/?mode=build_season_list&tmdb_id=$id,return)"
                                             } else {
                                                 "plugin://plugin.video.fenlight/?mode=playback.media&media_type=movie&tmdb_id=$id&autoplay=false"
                                             }
 
-                                            "intent:$kodiUrl#Intent;action=android.intent.action.VIEW;package=org.xbmc.kodi;component=org.xbmc.kodi/.Main;end"
+                                            "intent:#Intent;action=android.intent.action.VIEW;append=false;package=org.xbmc.kodi;component=org.xbmc.kodi/.Main;S.extras=$kodiUrl;end"
                                         }
                                         "Plex" -> {
                                             // Plex deep link to search
