@@ -110,7 +110,7 @@ class WallpaperProviderService : Service() {
                                             val mediaType = if (type == "tv") "episode" else "movie"
 
                                             var kodiUrl = "plugin://plugin.video.pov/?mode=play_media" +
-                                                        "&mediatype=$mediaType" +
+                                                        "&media_type=$mediaType" +
                                                         "&tmdb_id=$id" +
                                                         "&autoplay=false"
 
