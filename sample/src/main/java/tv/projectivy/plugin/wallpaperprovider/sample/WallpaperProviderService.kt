@@ -107,7 +107,7 @@ class WallpaperProviderService : Service() {
                                         }
                                         "Kodi POV" -> {
                                             // Force 'tv' or 'movie'
-                                            val mediaType = if (type == "tv") "tv" else "movie"
+                                            val mediaType = if (type == "tv") "episode" else "movie"
 
                                             var kodiUrl = "plugin://plugin.video.pov/?mode=play_media" +
                                                         "&mediatype=$mediaType" +
@@ -121,7 +121,7 @@ class WallpaperProviderService : Service() {
 
                                         "Kodi Fenlight" -> {
                                             // Force 'tv' or 'movie'
-                                            val mediaType = if (type == "tv") "tv" else "movie"
+                                            val mediaType = if (type == "tv") "episode" else "movie"
 
                                             var kodiUrl = "plugin://plugin.video.fenlight/?mode=playback.media" +
                                                         "&media_type=$mediaType" +
