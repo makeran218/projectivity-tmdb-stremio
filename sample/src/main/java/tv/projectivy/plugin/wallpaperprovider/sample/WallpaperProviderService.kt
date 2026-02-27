@@ -107,10 +107,9 @@ class WallpaperProviderService : Service() {
                                         }
                                         "Kodi POV" -> {
                                             val kodiUrl = if (type == "tv") {
-                                                // TV logic: Navigate to Season List (GUI)
-                                                "plugin://plugin.video.pov/?mode=build_season_list&tmdb_id=$id"
+                                                // We add &directory=true to tell the internal router this is a GUI list
+                                                "plugin://plugin.video.pov/?mode=build_season_list&tmdb_id=$id&directory=true"
                                             } else {
-                                                // Movie logic: Keep your original working code (Direct Play)
                                                 "plugin://plugin.video.pov/?mode=play_media&media_type=movie&tmdb_id=$id&autoplay=false"
                                             }
 
@@ -119,10 +118,9 @@ class WallpaperProviderService : Service() {
 
                                         "Kodi Fenlight" -> {
                                             val kodiUrl = if (type == "tv") {
-                                                // TV logic: Navigate to Season List (GUI)
-                                                "plugin://plugin.video.fenlight/?mode=build_season_list&tmdb_id=$id"
+                                                // Same logic for Fenlight
+                                                "plugin://plugin.video.fenlight/?mode=build_season_list&tmdb_id=$id&directory=true"
                                             } else {
-                                                // Movie logic: Keep your original working code (Direct Play)
                                                 "plugin://plugin.video.fenlight/?mode=playback.media&media_type=movie&tmdb_id=$id&autoplay=false"
                                             }
 
