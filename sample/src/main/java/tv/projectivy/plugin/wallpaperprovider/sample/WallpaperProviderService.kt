@@ -55,12 +55,12 @@ class WallpaperProviderService : Service() {
             val oneMinuteInMillis = 60 * 1000
 
             // If it's a standard elapsed event (1) but not enough time has passed, return last wallpaper
-            if (event is Event.TimeElapsed && !forceRefresh) {
+            /* if (event is Event.TimeElapsed && !forceRefresh) {
                 if (currentTime - lastUpdate < oneMinuteInMillis) {
                     Log.e("WallpaperService", "PROJECTIVY_LOG: Skipping API call - too soon (${(currentTime - lastUpdate) / 1000}s since last change)")
                     return getLastSavedWallpaper()
                 }
-            }
+            } */
 
             if (event is Event.TimeElapsed || forceRefresh) {
                 try {
