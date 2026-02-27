@@ -106,32 +106,24 @@ class WallpaperProviderService : Service() {
                                             "stremio:///detail/$stremioType/tmdb:$id"
                                         }
                                         "Kodi POV" -> {
-                                            // POV specifically wants 'episode' as the media_type for TV shows
-                                            val mediaType = if (type == "tv") "episode" else "movie"
-
-                                            var kodiUrl = "plugin://plugin.video.pov/?mode=play_media" +
-                                                        "&media_type=$mediaType" + // Note: POV usually uses 'media_type' with underscore
-                                                        "&tmdb_id=$id" +
-                                                        "&autoplay=false"
-
-                                            if (type == "tv") {
-                                                kodiUrl += "&season=1&episode=1"
+                                            val kodiUrl = if (type == "tv") {
+                                                // TV logic: Navigate to Season List (GUI)
+                                                "plugin://plugin.video.pov/?mode=build_season_list&tmdb_id=$id"
+                                            } else {
+                                                // Movie logic: Keep your original working code (Direct Play)
+                                                "plugin://plugin.video.pov/?mode=play_media&media_type=movie&tmdb_id=$id&autoplay=false"
                                             }
 
                                             "intent:$kodiUrl#Intent;action=android.intent.action.VIEW;package=org.xbmc.kodi;component=org.xbmc.kodi/.Main;end"
                                         }
 
                                         "Kodi Fenlight" -> {
-                                            // Fen Light also uses 'episode' for the media_type parameter
-                                            val mediaType = if (type == "tv") "episode" else "movie"
-
-                                            var kodiUrl = "plugin://plugin.video.fenlight/?mode=playback.media" +
-                                                        "&media_type=$mediaType" +
-                                                        "&tmdb_id=$id" +
-                                                        "&autoplay=false"
-
-                                            if (type == "tv") {
-                                                kodiUrl += "&season=1&episode=1"
+                                            val kodiUrl = if (type == "tv") {
+                                                // TV logic: Navigate to Season List (GUI)
+                                                "plugin://plugin.video.fenlight/?mode=build_season_list&tmdb_id=$id"
+                                            } else {
+                                                // Movie logic: Keep your original working code (Direct Play)
+                                                "plugin://plugin.video.fenlight/?mode=playback.media&media_type=movie&tmdb_id=$id&autoplay=false"
                                             }
 
                                             "intent:$kodiUrl#Intent;action=android.intent.action.VIEW;package=org.xbmc.kodi;component=org.xbmc.kodi/.Main;end"
