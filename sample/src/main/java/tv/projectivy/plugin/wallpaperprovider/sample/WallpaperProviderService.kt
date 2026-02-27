@@ -105,30 +105,32 @@ class WallpaperProviderService : Service() {
                                             val stremioType = if (type == "tv") "series" else "movie"
                                             "stremio:///detail/$stremioType/tmdb:$id"
                                         }
-                                       "Kodi POV" -> {
-                                           val finalAction = if (type == "tv") {
+                                        "Kodi POV" -> {
+                                            // Force 'tv' or 'movie'
+                                            val mediaType = if (type == "tv") "tv" else "movie"
 
-                                            // Open TV show details via ActivateWindow
-                                            val kodiCommand =
-                                                "ActivateWindow(Videos,\"plugin://plugin.video.fenlight/?mode=tvshow_details&tmdb_id=$id\",return)"
+                                            var kodiUrl = "plugin://plugin.video.pov/?mode=play_media" +
+                                                        "&mediatype=$mediaType" +
+                                                        "&tmdb_id=$id" +
+                                                        "&autoplay=false"
 
-                                            "kodi://$kodiCommand"
+                                            if (type == "tv") kodiUrl += "&season=1&episode=1"
 
-                                            } else {
-                                                // Movies: Keeping your original working direct-play logic
-                                                "intent:plugin://plugin.video.pov/?mode=play_media&media_type=movie&tmdb_id=$id&autoplay=false#Intent;action=android.intent.action.VIEW;package=org.xbmc.kodi;component=org.xbmc.kodi/.Main;end"
-                                            }
-                                            finalAction
+                                            "intent:$kodiUrl#Intent;action=android.intent.action.VIEW;package=org.xbmc.kodi;component=org.xbmc.kodi/.Main;end"
                                         }
 
                                         "Kodi Fenlight" -> {
-                                            val finalAction = if (type == "tv") {
-                                                val kodiCommand = "ActivateWindow(Videos,\"plugin://plugin.video.fenlight/?mode=build_season_list&tmdb_id=$id\",return)"
-                                                "kodi://$kodiCommand"
-                                            } else {
-                                                "intent:plugin://plugin.video.fenlight/?mode=playback.media&media_type=movie&tmdb_id=$id&autoplay=false#Intent;action=android.intent.action.VIEW;package=org.xbmc.kodi;component=org.xbmc.kodi/.Main;end"
-                                            }
-                                            finalAction
+                                            // Force 'tv' or 'movie'
+                                            val mediaType = if (type == "tv") "tv" else "movie"
+
+                                            var kodiUrl = "plugin://plugin.video.fenlight/?mode=playback.media" +
+                                                        "&media_type=$mediaType" +
+                                                        "&tmdb_id=$id" +
+                                                        "&autoplay=false"
+
+                                            if (type == "tv") kodiUrl += "&season=1&episode=1"
+
+                                            "intent:$kodiUrl#Intent;action=android.intent.action.VIEW;package=org.xbmc.kodi;component=org.xbmc.kodi/.Main;end"
                                         }
                                         "Plex" -> {
                                             // Plex deep link to search
